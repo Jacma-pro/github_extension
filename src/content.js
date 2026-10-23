@@ -18,6 +18,7 @@
       isActive: () => true,
       shortcuts: {
         "?": { label: "Afficher les raccourcis", run: toggleHelp },
+        h: { label: "Accueil", run: () => window.location.assign("/") },
         s: { label: "Settings du repo", path: "settings" },
       },
     },
