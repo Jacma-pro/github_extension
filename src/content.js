@@ -24,6 +24,11 @@
         m: { label: "Mes repos", when: hasLogin, run: () => window.location.assign(`/${currentLogin()}?tab=repositories`) },
         l: { label: "Mes pull requests", run: () => window.location.assign("/pulls") },
         s: { label: "Settings du repo", path: "settings" },
+        b: { label: "Branches", path: "branches" },
+        t: { label: "Tags", path: "tags" },
+        r: { label: "Releases", path: "releases" },
+        o: { label: "Commits", path: "commits" },
+        y: { label: "Insights", path: "pulse" },
       },
     },
     s: {
