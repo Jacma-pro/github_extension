@@ -34,6 +34,16 @@
         d: { label: "Copier le git clone (SSH)", when: () => currentRepo() !== null, run: copySshClone },
       },
     },
+    p: {
+      title: "Pull request",
+      isActive: () => currentPullNumber() !== null,
+      shortcuts: {
+        c: { label: "Conversation", path: () => `pull/${currentPullNumber()}` },
+        o: { label: "Commits", path: () => `pull/${currentPullNumber()}/commits` },
+        k: { label: "Checks", path: () => `pull/${currentPullNumber()}/checks` },
+        f: { label: "Files changed", path: () => `pull/${currentPullNumber()}/files` },
+      },
+    },
     s: {
       title: "Settings du repo",
       isActive: isOnRepoSettings,
@@ -79,6 +89,12 @@
   function isOnRepoSettings() {
     const [, , section] = window.location.pathname.split("/").filter(Boolean);
     return currentRepo() !== null && section === "settings";
+  }
+
+  function currentPullNumber() {
+    const [, , section, number] = window.location.pathname.split("/").filter(Boolean);
+    if (currentRepo() === null || section !== "pull" || !/^\d+$/.test(number ?? "")) return null;
+    return number;
   }
 
   function currentLogin() {
