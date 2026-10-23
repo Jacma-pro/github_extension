@@ -48,7 +48,30 @@ Séquences : appuyer sur `g`, relâcher, puis la lettre.
 |---|---|---|
 | `g` `?` | Afficher les raccourcis disponibles sur la page actuelle (`Esc` pour fermer) | Partout sur GitHub |
 | `g` `h` | Aller à l'accueil (dashboard) | Partout sur GitHub |
+| `g` `u` | Mon profil | Partout (connecté) |
+| `g` `m` | Mes repos | Partout (connecté) |
+| `g` `l` | Mes pull requests | Partout sur GitHub |
 | `g` `s` | Ouvrir les Settings du repo | N'importe quelle page d'un repo |
+| `g` `b` | Branches | N'importe quelle page d'un repo |
+| `g` `t` | Tags | N'importe quelle page d'un repo |
+| `g` `r` | Releases | N'importe quelle page d'un repo |
+| `g` `o` | Commits (branche par défaut) | N'importe quelle page d'un repo |
+| `g` `y` | Insights | N'importe quelle page d'un repo |
+| `g` `d` | Copier `git clone git@github.com:owner/repo.git` (SSH) | N'importe quelle page d'un repo |
+| `-` | Remonter au dossier parent | En parcourant le code (`/tree/...` ou `/blob/...`) |
+
+> `-` suppose que le nom de branche ne contient pas de `/` (une branche `feat/x` donnera une mauvaise URL).
+
+### Dans une pull request
+
+Actifs uniquement sur les pages `/owner/repo/pull/123/...`.
+
+| Raccourci | Onglet |
+|---|---|
+| `p` `c` | Conversation |
+| `p` `o` | Commits |
+| `p` `k` | Checks |
+| `p` `f` | Files changed |
 
 ### Dans les Settings d'un repo
 
@@ -78,7 +101,11 @@ Pas encore couverts (URL incertaine) : Moderation, Tags, Copilot, Planning, Code
 | Besoin | Statut | Notes |
 |---|---|---|
 | Ouvrir la recherche sur la page principale | ✅ Natif | `/` ou `s`. Idée initiale `Cmd + F + R` abandonnée : conflit avec `Cmd + F` (recherche Chrome) et `Cmd + R` (reload). |
-| Accéder à un onglet du repo sans faire plein de `Tab` | 🟡 Partiel en natif | Couvert par `g` + lettre, sauf **Insights** et **Settings**. |
+| Accéder à un onglet du repo sans faire plein de `Tab` | 🟡 Partiel en natif | Couvert par `g` + lettre en natif, le reste (Settings, Insights, Branches, Tags, Releases, Commits) par l'extension. |
+| Passer d'un onglet à l'autre dans une PR | ✅ Extension | `p` + lettre. Pas de raccourci natif. |
+| Remonter dans l'arborescence du code | ✅ Extension | `-`. |
+| Copier la commande de clone | ✅ Extension | `g` `d`, en SSH. `y y` écarté : `y` est natif (permalien) dans le code. |
+| Aller sur mon profil, mes repos, mes PR | ✅ Extension | `g` `u`, `g` `m`, `g` `l`. |
 | Revenir à l'accueil | ✅ Extension | `g` `h`. Pas de raccourci natif. |
 | Retrouver les raccourcis quand on les a oubliés | ✅ Extension | `g` `?`. Popup contextuel : n'affiche que les raccourcis utilisables sur la page actuelle. Le `?` natif reste celui de GitHub. |
 | Naviguer entre les pages des Settings | ✅ Extension | `s` + lettre, seulement dans les Settings. |
@@ -86,5 +113,5 @@ Pas encore couverts (URL incertaine) : Moderation, Tags, Copilot, Planning, Code
 
 ## Idées
 
-- **Compléter les onglets manquants** avec le même système (Insights, et Security si besoin puisque `g s` est repris). Éviter `g n` (déjà pris par GitHub pour les notifications) et `g s` (utilisé par l'extension pour Settings).
-- **Hints à la Vimium** : une touche affiche une lettre sur chaque onglet ou lien cliquable, on tape la lettre pour cliquer. Plus générique, et peut s'étendre à toute la page.
+- **Security** si besoin, puisque `g s` est repris par l'extension. Lettres encore libres après `g` : `e j k q v x z`.
+- **Hints à la Vimium** : une touche affiche une lettre sur chaque onglet ou lien cliquable, on tape la lettre pour cliquer. Plus générique, et peut s'étendre à toute la page. `f` est le choix classique mais il est pris dans les logs Actions.
