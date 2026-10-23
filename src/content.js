@@ -20,6 +20,9 @@
       shortcuts: {
         "?": { label: "Afficher les raccourcis", run: toggleHelp },
         h: { label: "Accueil", run: () => window.location.assign("/") },
+        u: { label: "Mon profil", when: hasLogin, run: () => window.location.assign(`/${currentLogin()}`) },
+        m: { label: "Mes repos", when: hasLogin, run: () => window.location.assign(`/${currentLogin()}?tab=repositories`) },
+        l: { label: "Mes pull requests", run: () => window.location.assign("/pulls") },
         s: { label: "Settings du repo", path: "settings" },
       },
     },
@@ -68,6 +71,14 @@
   function isOnRepoSettings() {
     const [, , section] = window.location.pathname.split("/").filter(Boolean);
     return currentRepo() !== null && section === "settings";
+  }
+
+  function currentLogin() {
+    return document.querySelector('meta[name="user-login"]')?.content || null;
+  }
+
+  function hasLogin() {
+    return currentLogin() !== null;
   }
 
   // Path shortcuts only make sense inside a repo.
