@@ -17,6 +17,25 @@
         s: "settings",
       },
     },
+    s: {
+      isActive: isOnRepoSettings,
+      shortcuts: {
+        g: "settings",
+        c: "settings/access",
+        r: "settings/rules",
+        b: "settings/branches",
+        a: "settings/actions",
+        w: "settings/hooks",
+        e: "settings/environments",
+        p: "settings/pages",
+        y: "settings/security_analysis",
+        k: "settings/keys",
+        s: "settings/secrets/actions",
+        v: "settings/variables/actions",
+        i: "settings/installations",
+        l: "settings/key_links",
+      },
+    },
   };
 
   let pendingPrefix = null;
@@ -37,6 +56,11 @@
     const [owner, repo] = window.location.pathname.split("/").filter(Boolean);
     if (!owner || !repo || RESERVED_OWNERS.has(owner)) return null;
     return { owner, repo };
+  }
+
+  function isOnRepoSettings() {
+    const [, , section] = window.location.pathname.split("/").filter(Boolean);
+    return currentRepo() !== null && section === "settings";
   }
 
   function swallow(event) {
