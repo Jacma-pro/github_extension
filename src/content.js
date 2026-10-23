@@ -1,5 +1,6 @@
 (() => {
   const SEQUENCE_TIMEOUT_MS = 1000;
+  const HELP_HOST_ID = "ghkn-help";
 
   // Top-level GitHub paths that look like "/owner/repo" but are not repos.
   const RESERVED_OWNERS = new Set([
@@ -9,31 +10,35 @@
     "logout", "new", "enterprise", "about", "pricing", "apps", "users",
   ]);
 
-  // Prefix key → { where the sequence is active, second key → path relative to the repo root }.
+  // Prefix key → { title, where the sequence is active, second key → shortcut }.
+  // A shortcut either navigates to `path` (relative to the repo root) or calls `run`.
   const SEQUENCES = {
     g: {
+      title: "Partout",
       isActive: () => true,
       shortcuts: {
-        s: "settings",
+        "?": { label: "Afficher les raccourcis", run: toggleHelp },
+        s: { label: "Settings du repo", path: "settings" },
       },
     },
     s: {
+      title: "Settings du repo",
       isActive: isOnRepoSettings,
       shortcuts: {
-        g: "settings",
-        c: "settings/access",
-        r: "settings/rules",
-        b: "settings/branches",
-        a: "settings/actions",
-        w: "settings/hooks",
-        e: "settings/environments",
-        p: "settings/pages",
-        y: "settings/security_analysis",
-        k: "settings/keys",
-        s: "settings/secrets/actions",
-        v: "settings/variables/actions",
-        i: "settings/installations",
-        l: "settings/key_links",
+        g: { label: "General", path: "settings" },
+        c: { label: "Collaborators", path: "settings/access" },
+        r: { label: "Rulesets", path: "settings/rules" },
+        b: { label: "Branches", path: "settings/branches" },
+        a: { label: "Actions", path: "settings/actions" },
+        w: { label: "Webhooks", path: "settings/hooks" },
+        e: { label: "Environments", path: "settings/environments" },
+        p: { label: "Pages", path: "settings/pages" },
+        y: { label: "Advanced Security", path: "settings/security_analysis" },
+        k: { label: "Deploy keys", path: "settings/keys" },
+        s: { label: "Secrets (Actions)", path: "settings/secrets/actions" },
+        v: { label: "Variables (Actions)", path: "settings/variables/actions" },
+        i: { label: "GitHub Apps", path: "settings/installations" },
+        l: { label: "Autolink references", path: "settings/key_links" },
       },
     },
   };
@@ -63,26 +68,138 @@
     return currentRepo() !== null && section === "settings";
   }
 
+  // Path shortcuts only make sense inside a repo.
+  function isAvailable(shortcut) {
+    return !shortcut.path || currentRepo() !== null;
+  }
+
   function swallow(event) {
     // Stop GitHub's own handlers (e.g. "s" focuses search).
     event.preventDefault();
     event.stopImmediatePropagation();
   }
 
+  function closeHelp() {
+    document.getElementById(HELP_HOST_ID)?.remove();
+  }
+
+  function toggleHelp() {
+    if (document.getElementById(HELP_HOST_ID)) {
+      closeHelp();
+      return;
+    }
+
+    const sections = Object.entries(SEQUENCES)
+      .filter(([, sequence]) => sequence.isActive())
+      .map(([prefix, sequence]) => {
+        const rows = Object.entries(sequence.shortcuts)
+          .filter(([, shortcut]) => isAvailable(shortcut))
+          .map(([key, shortcut]) => `
+            <tr>
+              <td><kbd>${prefix}</kbd> <kbd>${key}</kbd></td>
+              <td>${shortcut.label}</td>
+            </tr>`)
+          .join("");
+        return `<h3>${sequence.title}</h3><table>${rows}</table>`;
+      })
+      .join("");
+
+    // Shadow DOM keeps GitHub's CSS out of the popup (and ours out of GitHub).
+    const host = document.createElement("div");
+    host.id = HELP_HOST_ID;
+    const root = host.attachShadow({ mode: "open" });
+    root.innerHTML = `
+      <style>
+        .backdrop {
+          position: fixed;
+          inset: 0;
+          z-index: 2147483647;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: rgba(0, 0, 0, 0.5);
+          font: 14px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+        .dialog {
+          max-width: 480px;
+          width: calc(100% - 32px);
+          max-height: 80vh;
+          overflow-y: auto;
+          padding: 16px 24px;
+          border-radius: 12px;
+          border: 1px solid var(--borderColor-default, #d0d7de);
+          background: var(--bgColor-default, #fff);
+          color: var(--fgColor-default, #1f2328);
+        }
+        h2 { margin: 0 0 8px; font-size: 18px; }
+        h3 {
+          margin: 16px 0 4px;
+          font-size: 12px;
+          text-transform: uppercase;
+          color: var(--fgColor-muted, #59636e);
+        }
+        table { width: 100%; border-collapse: collapse; }
+        td { padding: 4px 0; }
+        td:first-child { width: 80px; white-space: nowrap; }
+        kbd {
+          display: inline-block;
+          min-width: 16px;
+          padding: 2px 6px;
+          text-align: center;
+          font: 12px ui-monospace, SFMono-Regular, Menlo, monospace;
+          border: 1px solid var(--borderColor-default, #d0d7de);
+          border-radius: 6px;
+          background: var(--bgColor-muted, #f6f8fa);
+        }
+        .hint { margin: 16px 0 0; color: var(--fgColor-muted, #59636e); font-size: 12px; }
+      </style>
+      <div class="backdrop">
+        <div class="dialog" role="dialog" aria-label="Raccourcis clavier">
+          <h2>Raccourcis de l'extension</h2>
+          ${sections}
+          <h3>GitHub (natif)</h3>
+          <table>
+            <tr>
+              <td><kbd>?</kbd></td>
+              <td>Raccourcis natifs de GitHub</td>
+            </tr>
+          </table>
+          <p class="hint"><kbd>Esc</kbd> pour fermer</p>
+        </div>
+      </div>`;
+
+    root.querySelector(".backdrop").addEventListener("click", (event) => {
+      if (event.target === event.currentTarget) closeHelp();
+    });
+    document.body.appendChild(host);
+  }
+
   function onKeyDown(event) {
+    if (event.key === "Escape" && document.getElementById(HELP_HOST_ID)) {
+      swallow(event);
+      closeHelp();
+      return;
+    }
+
     if (event.metaKey || event.ctrlKey || event.altKey) return;
+    // Pressing Shift alone (e.g. to type "?") must not break a pending sequence.
+    if (event.key === "Shift") return;
     if (isTyping(event.target)) return;
 
     const key = event.key.toLowerCase();
 
     if (pendingPrefix) {
-      const path = SEQUENCES[pendingPrefix].shortcuts[key];
-      const repo = currentRepo();
+      const shortcut = SEQUENCES[pendingPrefix].shortcuts[key];
       resetSequence();
-      if (!path || !repo) return;
+      if (!shortcut || !isAvailable(shortcut)) return;
 
       swallow(event);
-      window.location.assign(`/${repo.owner}/${repo.repo}/${path}`);
+      if (shortcut.run) {
+        shortcut.run();
+        return;
+      }
+      const repo = currentRepo();
+      window.location.assign(`/${repo.owner}/${repo.repo}/${shortcut.path}`);
       return;
     }
 
