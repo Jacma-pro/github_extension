@@ -11,10 +11,11 @@
   ]);
 
   // Prefix key → { title, where the sequence is active, second key → shortcut }.
-  // A shortcut either navigates to `path` (relative to the repo root) or calls `run`.
+  // A shortcut either navigates to `path` (relative to the repo root, string or function)
+  // or calls `run`. `when` overrides the default availability check.
   const SEQUENCES = {
     g: {
-      title: "Partout",
+      title: "Navigation",
       isActive: () => true,
       shortcuts: {
         "?": { label: "Afficher les raccourcis", run: toggleHelp },
@@ -71,7 +72,12 @@
 
   // Path shortcuts only make sense inside a repo.
   function isAvailable(shortcut) {
+    if (shortcut.when) return shortcut.when();
     return !shortcut.path || currentRepo() !== null;
+  }
+
+  function resolvePath(shortcut) {
+    return typeof shortcut.path === "function" ? shortcut.path() : shortcut.path;
   }
 
   function swallow(event) {
@@ -90,19 +96,21 @@
       return;
     }
 
+    const renderSection = (title, shortcuts, prefix) => {
+      const rows = Object.entries(shortcuts)
+        .filter(([, shortcut]) => isAvailable(shortcut))
+        .map(([key, shortcut]) => `
+          <tr>
+            <td>${prefix ? `<kbd>${prefix}</kbd> ` : ""}<kbd>${key}</kbd></td>
+            <td>${shortcut.label}</td>
+          </tr>`)
+        .join("");
+      return rows ? `<h3>${title}</h3><table>${rows}</table>` : "";
+    };
+
     const sections = Object.entries(SEQUENCES)
       .filter(([, sequence]) => sequence.isActive())
-      .map(([prefix, sequence]) => {
-        const rows = Object.entries(sequence.shortcuts)
-          .filter(([, shortcut]) => isAvailable(shortcut))
-          .map(([key, shortcut]) => `
-            <tr>
-              <td><kbd>${prefix}</kbd> <kbd>${key}</kbd></td>
-              <td>${shortcut.label}</td>
-            </tr>`)
-          .join("");
-        return `<h3>${sequence.title}</h3><table>${rows}</table>`;
-      })
+      .map(([prefix, sequence]) => renderSection(sequence.title, sequence.shortcuts, prefix))
       .join("");
 
     // Shadow DOM keeps GitHub's CSS out of the popup (and ours out of GitHub).
@@ -175,6 +183,15 @@
     document.body.appendChild(host);
   }
 
+  function runShortcut(shortcut) {
+    if (shortcut.run) {
+      shortcut.run();
+      return;
+    }
+    const repo = currentRepo();
+    window.location.assign(`/${repo.owner}/${repo.repo}/${resolvePath(shortcut)}`);
+  }
+
   function onKeyDown(event) {
     if (event.key === "Escape" && document.getElementById(HELP_HOST_ID)) {
       swallow(event);
@@ -195,12 +212,7 @@
       if (!shortcut || !isAvailable(shortcut)) return;
 
       swallow(event);
-      if (shortcut.run) {
-        shortcut.run();
-        return;
-      }
-      const repo = currentRepo();
-      window.location.assign(`/${repo.owner}/${repo.repo}/${shortcut.path}`);
+      runShortcut(shortcut);
       return;
     }
 
