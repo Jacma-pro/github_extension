@@ -46,6 +46,7 @@ Séquences : appuyer sur `g`, relâcher, puis la lettre.
 
 | Raccourci | Action | Où |
 |---|---|---|
+| `g` `?` | Afficher les raccourcis disponibles sur la page actuelle (`Esc` pour fermer) | Partout sur GitHub |
 | `g` `s` | Ouvrir les Settings du repo | N'importe quelle page d'un repo |
 
 ### Dans les Settings d'un repo
@@ -77,6 +78,7 @@ Pas encore couverts (URL incertaine) : Moderation, Tags, Copilot, Planning, Code
 |---|---|---|
 | Ouvrir la recherche sur la page principale | ✅ Natif | `/` ou `s`. Idée initiale `Cmd + F + R` abandonnée : conflit avec `Cmd + F` (recherche Chrome) et `Cmd + R` (reload). |
 | Accéder à un onglet du repo sans faire plein de `Tab` | 🟡 Partiel en natif | Couvert par `g` + lettre, sauf **Insights** et **Settings**. |
+| Retrouver les raccourcis quand on les a oubliés | ✅ Extension | `g` `?`. Popup contextuel : n'affiche que les raccourcis utilisables sur la page actuelle. Le `?` natif reste celui de GitHub. |
 | Naviguer entre les pages des Settings | ✅ Extension | `s` + lettre, seulement dans les Settings. |
 | Accéder aux Settings d'un repo | ✅ Extension | `g` `s`. Pas de raccourci natif. Écrase volontairement le `g s` natif (Security and quality), jugé moins utile. |
 
