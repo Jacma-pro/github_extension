@@ -31,7 +31,6 @@ Séquences : appuyer sur `g`, relâcher, puis la lettre.
 | `g` `i` | Issues |
 | `g` `p` | Pull requests |
 | `g` `a` | Actions |
-| `g` `b` | Projects |
 | `g` `w` | Wiki |
 | `g` `g` | Discussions |
 | ~~`g` `s`~~ | Security and quality — **remplacé par l'extension** (Settings) |
