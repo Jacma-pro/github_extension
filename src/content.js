@@ -1,6 +1,8 @@
 (() => {
   const SEQUENCE_TIMEOUT_MS = 1000;
   const HELP_HOST_ID = "ghkn-help";
+  const TOAST_HOST_ID = "ghkn-toast";
+  const TOAST_DURATION_MS = 2000;
 
   // Top-level GitHub paths that look like "/owner/repo" but are not repos.
   const RESERVED_OWNERS = new Set([
@@ -29,6 +31,7 @@
         r: { label: "Releases", path: "releases" },
         o: { label: "Commits", path: "commits" },
         y: { label: "Insights", path: "pulse" },
+        d: { label: "Copier le git clone (SSH)", when: () => currentRepo() !== null, run: copySshClone },
       },
     },
     s: {
@@ -86,6 +89,17 @@
     return currentLogin() !== null;
   }
 
+  async function copySshClone() {
+    const { owner, repo } = currentRepo();
+    const command = `git clone git@github.com:${owner}/${repo}.git`;
+    try {
+      await navigator.clipboard.writeText(command);
+      showToast(`Copié : ${command}`);
+    } catch {
+      showToast("Impossible de copier dans le presse-papier");
+    }
+  }
+
   // Path shortcuts only make sense inside a repo.
   function isAvailable(shortcut) {
     if (shortcut.when) return shortcut.when();
@@ -94,6 +108,35 @@
 
   function resolvePath(shortcut) {
     return typeof shortcut.path === "function" ? shortcut.path() : shortcut.path;
+  }
+
+  function showToast(message) {
+    document.getElementById(TOAST_HOST_ID)?.remove();
+
+    const host = document.createElement("div");
+    host.id = TOAST_HOST_ID;
+    const root = host.attachShadow({ mode: "open" });
+    root.innerHTML = `
+      <style>
+        .toast {
+          position: fixed;
+          bottom: 24px;
+          left: 50%;
+          transform: translateX(-50%);
+          z-index: 2147483647;
+          padding: 8px 16px;
+          border-radius: 8px;
+          border: 1px solid var(--borderColor-default, #d0d7de);
+          background: var(--bgColor-default, #fff);
+          color: var(--fgColor-default, #1f2328);
+          font: 13px ui-monospace, SFMono-Regular, Menlo, monospace;
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        }
+      </style>
+      <div class="toast" role="status"></div>`;
+    root.querySelector(".toast").textContent = message;
+    document.body.appendChild(host);
+    setTimeout(() => host.remove(), TOAST_DURATION_MS);
   }
 
   function swallow(event) {
