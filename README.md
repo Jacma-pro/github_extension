@@ -49,12 +49,36 @@ Séquences : appuyer sur `g`, relâcher, puis la lettre.
 |---|---|---|
 | `g` `s` | Ouvrir les Settings du repo | N'importe quelle page d'un repo |
 
+### Dans les Settings d'un repo
+
+Actifs uniquement sur les pages `/owner/repo/settings/...`. Sur ces pages, `s` seul ne met plus le focus sur la recherche (utiliser `/` à la place).
+
+| Raccourci | Page |
+|---|---|
+| `s` `g` | General |
+| `s` `c` | Collaborators |
+| `s` `r` | Rulesets |
+| `s` `b` | Branches |
+| `s` `a` | Actions |
+| `s` `w` | Webhooks |
+| `s` `e` | Environments |
+| `s` `p` | Pages |
+| `s` `y` | Advanced Security |
+| `s` `k` | Deploy keys |
+| `s` `s` | Secrets (Actions) |
+| `s` `v` | Variables (Actions) |
+| `s` `i` | GitHub Apps |
+| `s` `l` | Autolink references |
+
+Pas encore couverts (URL incertaine) : Moderation, Tags, Copilot, Planning, Codespaces.
+
 ## Ce qui est galère (besoins)
 
 | Besoin | Statut | Notes |
 |---|---|---|
 | Ouvrir la recherche sur la page principale | ✅ Natif | `/` ou `s`. Idée initiale `Cmd + F + R` abandonnée : conflit avec `Cmd + F` (recherche Chrome) et `Cmd + R` (reload). |
 | Accéder à un onglet du repo sans faire plein de `Tab` | 🟡 Partiel en natif | Couvert par `g` + lettre, sauf **Insights** et **Settings**. |
+| Naviguer entre les pages des Settings | ✅ Extension | `s` + lettre, seulement dans les Settings. |
 | Accéder aux Settings d'un repo | ✅ Extension | `g` `s`. Pas de raccourci natif. Écrase volontairement le `g s` natif (Security and quality), jugé moins utile. |
 
 ## Idées
