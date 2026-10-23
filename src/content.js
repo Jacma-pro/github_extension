@@ -66,6 +66,14 @@
     },
   };
 
+  // Single keys, no prefix.
+  const SINGLE_KEYS = {
+    title: "Code",
+    shortcuts: {
+      "-": { label: "Dossier parent", when: () => parentDirPath() !== null, run: goToParentDir },
+    },
+  };
+
   let pendingPrefix = null;
   let pendingTimer = null;
 
@@ -103,6 +111,21 @@
 
   function hasLogin() {
     return currentLogin() !== null;
+  }
+
+  // "/owner/repo/{tree|blob}/<ref>/<path>" → parent folder URL.
+  // Assumes the ref has no "/" (a branch like "feat/x" would be cut wrong).
+  function parentDirPath() {
+    const [owner, repo, section, ref, ...path] = window.location.pathname.split("/").filter(Boolean);
+    if (currentRepo() === null || !["tree", "blob"].includes(section) || !ref) return null;
+    if (path.length === 0) return null;
+    const parent = path.slice(0, -1);
+    if (parent.length === 0) return `/${owner}/${repo}/tree/${ref}`;
+    return `/${owner}/${repo}/tree/${ref}/${parent.join("/")}`;
+  }
+
+  function goToParentDir() {
+    window.location.assign(parentDirPath());
   }
 
   async function copySshClone() {
@@ -186,6 +209,7 @@
     const sections = Object.entries(SEQUENCES)
       .filter(([, sequence]) => sequence.isActive())
       .map(([prefix, sequence]) => renderSection(sequence.title, sequence.shortcuts, prefix))
+      .concat(renderSection(SINGLE_KEYS.title, SINGLE_KEYS.shortcuts))
       .join("");
 
     // Shadow DOM keeps GitHub's CSS out of the popup (and ours out of GitHub).
@@ -288,6 +312,13 @@
 
       swallow(event);
       runShortcut(shortcut);
+      return;
+    }
+
+    const single = SINGLE_KEYS.shortcuts[key];
+    if (single && isAvailable(single)) {
+      swallow(event);
+      runShortcut(single);
       return;
     }
 
